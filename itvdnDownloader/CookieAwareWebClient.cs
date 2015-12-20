@@ -20,6 +20,7 @@ namespace itvdnDownloader
         public CookieAwareWebClient(CookieContainer cookies)
         {
             this.CookieContainer = cookies;
+            this.Encoding = Encoding.UTF8;
         }
 
         protected override WebRequest GetWebRequest(Uri address)
@@ -53,6 +54,7 @@ namespace itvdnDownloader
 
         protected override WebResponse GetWebResponse(WebRequest request, IAsyncResult result)
         {
+
             WebResponse response = base.GetWebResponse(request, result);
             String setCookieHeader = response.Headers[HttpResponseHeader.SetCookie];
 
