@@ -12,6 +12,6 @@ namespace itvdnDownloader
         public string DataVideoPageUrl { get; set; }
         public string DataVideoLocFolder { get; set; }
         public AuthContext Auth { get; set; }
-        public ObservableCollection<LessonData> Lessons { get; set; }
+        public ObservableCollection<LessonData> Lessons { get; set; } = new ObservableCollection<LessonData>();
     }
 }

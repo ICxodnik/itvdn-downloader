@@ -33,9 +33,10 @@ namespace itvdnDownloader
         private async void btVideoList_Click(object sender, RoutedEventArgs e)
         {
             var lessons = await downloader.GetLessons(context.DataVideoPageUrl);
-
-            context.Lessons = new ObservableCollection<LessonData>(lessons);
-
+            foreach (var lesson in lessons)
+            {
+                context.Lessons.Add(lesson);
+            }
         }
 
         private void main_Loaded(object sender, RoutedEventArgs e)

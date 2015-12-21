@@ -20,19 +20,17 @@ namespace itvdnDownloader
 
         public async Task<IEnumerable<LessonData>> GetLessons(string url)
         {
-            //browser.Navigate()
-
-
-            //var doc = new HtmlDocument();
-            //doc.LoadHtml(html);
-
-
-
-
-
-
-
-            return null;
+            var html = await webClient.DownloadStringTaskAsync(url);
+            var doc = new HtmlDocument();
+            doc.LoadHtml(html);
+            var selector = "//div[@id='lessons-list']/a[@class='media']"; // XPath
+            var lessons = doc.DocumentNode.SelectNodes(selector);
+            return lessons.Select(href => new LessonData
+                {
+                    Url = href.Attributes["href"].Value,
+                    Title = href.SelectSingleNode("div[@class = 'media-body']/p")?.InnerText
+                }
+            );
         }
 
 
