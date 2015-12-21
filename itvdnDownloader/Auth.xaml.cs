@@ -32,7 +32,7 @@ namespace itvdnDownloader
 
         private async void btAuth_Click(object sender, RoutedEventArgs e)
         {
-            var status = await itvdnWeb.Auth2(context.Login, context.Password);
+            var status = await itvdnWeb.Auth(context.Login, context.Password);
             if (status)
             {
                 AuthCompleted();
