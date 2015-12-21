@@ -30,10 +30,17 @@ namespace itvdnDownloader
             InitializeComponent();
         }
 
-        private void btAuth_Click(object sender, RoutedEventArgs e)
+        private async void btAuth_Click(object sender, RoutedEventArgs e)
         {
-            //itvdnWeb.Auth(context.Login, context.Password, AuthCompleted);
-            itvdnWeb.Auth2(context.Login, context.Password);
+            var status = await itvdnWeb.Auth2(context.Login, context.Password);
+            if (status)
+            {
+                AuthCompleted();
+            }
+            else
+            {
+                // todo: display authorization error message
+            }
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -48,7 +55,7 @@ namespace itvdnDownloader
         private void AuthCompleted()
         {
             new MainWindow(context).Show();
-            this.Close();
+            Close();
         }
     }
 }
