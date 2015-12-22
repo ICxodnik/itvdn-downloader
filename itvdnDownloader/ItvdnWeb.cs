@@ -23,13 +23,16 @@ namespace itvdnDownloader
             var html = await webClient.DownloadStringTaskAsync(url);
             var doc = new HtmlDocument();
             doc.LoadHtml(html);
-            var selector = "//div[@id='lessons-list']/a[@class='media']"; // XPath
-            var lessons = doc.DocumentNode.SelectNodes(selector);
+            var select = "//div[@id='lessons-list']/a[@class='media']"; // XPath
+            var lessons = doc.DocumentNode.SelectNodes(select);
+          
+
             return lessons.Select(href => new LessonData
-                {
-                    Url = href.Attributes["href"].Value,
-                    Title = href.SelectSingleNode("div[@class = 'media-body']/p")?.InnerText
-                }
+            {
+                Url = href.Attributes["href"].Value,
+                Title = href.SelectSingleNode("div[@class = 'media-body']/p")?.InnerText,
+                 Number = href.SelectSingleNode("div[@class = 'pull-left']//div[@class = 'media-inner']/span")?.InnerText
+            }
             );
         }
 

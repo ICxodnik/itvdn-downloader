@@ -12,7 +12,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using mshtml;
-using System.Windows.Forms;
 using System.Runtime.InteropServices;
 
 namespace itvdnDownloader
@@ -32,19 +31,38 @@ namespace itvdnDownloader
 
         private async void btAuth_Click(object sender, RoutedEventArgs e)
         {
-            var status = await itvdnWeb.Auth(context.Login, context.Password);
-            if (status)
+            context.Falling = false;
+            try
             {
-                AuthCompleted();
+                var status = await itvdnWeb.Auth(context.Login, context.Password);
+
+                if (status)
+                {
+                    AuthCompleted();
+                }
             }
-            else
+            catch
             {
-                // todo: display authorization error message
+                {
+                    // todo: display authorization error message
+                    MessageBoxResult result = MessageBox.Show("Authorization error, do you want to close this window?",
+       "Confirmation", MessageBoxButton.YesNo);
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        Close();
+                    }
+                    else if (result == MessageBoxResult.No)
+                    {
+                        new MainWindow(context).Show();
+                    }
+
+                }
             }
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            context.Falling = true;
 #if DEBUG
             context.Login = "ICxodnik@cbsid.com";
             context.Password = "lesenkaK***";

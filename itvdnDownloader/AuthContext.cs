@@ -10,6 +10,7 @@ namespace itvdnDownloader
     {
         public string Login { get; set; }
         public string Password { get; set; }
+        public bool Falling { get; set; }
         public string RequestVerificationToken { get; set; }
     }
 }

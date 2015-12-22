@@ -36,7 +36,7 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="1" />
                 </Grid.ColumnDefinitions>
-                <Label Content="0" Style="{StaticResource LessonItemNumber}" Grid.Row="0" Grid.RowSpan="2"  Grid.Column="0" />
+                <Label Content="{Binding Number}" Style="{StaticResource LessonItemNumber}" Grid.Row="0" Grid.RowSpan="2"  Grid.Column="0" />
                 <TextBlock Text="{Binding Title}" Style="{StaticResource LessonItemTitle}" Grid.Row="0" Grid.Column="1" />
                 <TextBlock Text="{Binding Url}" Style="{StaticResource LessonItemLink}" Grid.Row="1" Grid.Column="1" />
             </Grid>
@@ -55,12 +55,12 @@
 
             <Label x:Name="lbOut" Content="Интернет-ресурс" HorizontalAlignment="Stretch" />
             <TextBox x:Name="tbUrlOut" HorizontalAlignment="Stretch" TextWrapping="Wrap" Text="{Binding DataVideoPageUrl}" />
-            <Button x:Name="btVideoList" Content="Загрузить список видео" HorizontalAlignment="Stretch" Click="btVideoList_Click" />
+            <Button x:Name="btVideoList" Content="Загрузить список видео" HorizontalAlignment="Stretch" Click="btVideoList_Click" IsEnabled="{Binding Falling}" />
         </StackPanel>
 
         <ListView x:Name="lbListVideo" HorizontalAlignment="Stretch" Grid.Row="1" HorizontalContentAlignment="Stretch"
                  ItemsSource="{Binding Lessons}" 
-                 ItemTemplate="{DynamicResource LessonsItemTemplate}" />
+                 ItemTemplate="{DynamicResource LessonsItemTemplate}" Margin="0,5.4,-0.4,85" Grid.RowSpan="2" />
 
         <StackPanel Orientation="Vertical" Grid.Row="2">
             <Label x:Name="lbLoc" Content="Локальный-ресурс" HorizontalAlignment="Stretch" />

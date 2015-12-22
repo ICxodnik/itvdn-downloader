@@ -10,5 +10,6 @@ namespace itvdnDownloader
     {
         public string Url { get; set; }
         public string Title { get; set; }
+        public string Number { get; set; }
     }
 }

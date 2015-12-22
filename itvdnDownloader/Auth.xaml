@@ -23,7 +23,7 @@
         <Label Grid.Row="1" Grid.Column="0">Пароль:</Label>
         <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Password}"></TextBox>
 
-        <Button x:Name="btAuth" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Click="btAuth_Click">Войти</Button>
+        <Button x:Name="btAuth" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Click="btAuth_Click" IsEnabled="{Binding Falling}">Войти</Button>
 
     </Grid>
 </Window>
