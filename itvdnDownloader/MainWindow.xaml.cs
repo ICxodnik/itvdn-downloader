@@ -50,9 +50,6 @@ namespace itvdnDownloader
         private void main_Loaded(object sender, RoutedEventArgs e)
         {
             DataContext = context;
-#if DEBUG
-            context.DataVideoPageUrl = "http://itvdn.com/ru/video/csharp-essential";
-#endif
         }
 
         private void btChoose_Click(object sender, RoutedEventArgs e)

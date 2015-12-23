@@ -11,13 +11,38 @@ namespace itvdnDownloader
     
     class MainDataContext : INotifyPropertyChanged
     {
-        public string DataVideoPageUrl { get; set; }
-        public string DataVideoLocFolder { get; set; }
+        
+        private string dataVideoPageUrl = "http://itvdn.com/ru/video/csharp-essential";
+        private string dataVideoLocFolder = @"D:\";
         private bool canReadSourse = true;
         public AuthContext Auth { get; set; }
         public ObservableCollection<LessonData> Lessons { get; set; } = new ObservableCollection<LessonData>();
 
-        
+        public string DataVideoPageUrl
+        {
+            get
+            {
+                return dataVideoPageUrl;
+            }
+            set
+            {
+                dataVideoPageUrl = value;
+                Notify(nameof(DataVideoPageUrl));
+            }
+        }
+
+        public string DataVideoLocFolder
+        {
+            get
+            {
+                return dataVideoLocFolder;
+            }
+            set
+            {
+                dataVideoLocFolder = value;
+                Notify(nameof(DataVideoLocFolder));
+            }
+        }
 
         public bool CanReadSourse
         {
@@ -31,7 +56,6 @@ namespace itvdnDownloader
                 Notify(nameof(CanReadSourse));
             }
         }
-
 
         private void Notify(string propName)
         {
