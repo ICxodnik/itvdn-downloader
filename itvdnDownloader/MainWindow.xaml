@@ -56,7 +56,7 @@
 
             <Label x:Name="lbOut" Content="Интернет-ресурс" HorizontalAlignment="Stretch" />
             <TextBox x:Name="tbUrlOut" HorizontalAlignment="Stretch" TextWrapping="Wrap" Text="{Binding DataVideoPageUrl}" />
-            <Button x:Name="btVideoList" Content="Загрузить список видео" HorizontalAlignment="Stretch" Click="btVideoList_Click" IsEnabled="{Binding Falling}" />
+            <Button x:Name="btVideoList" Content="Загрузить список видео" HorizontalAlignment="Stretch" Click="btVideoList_Click" IsEnabled="{Binding CanReadSourse}" />
         </StackPanel>
 
         <ListView x:Name="lbListVideo" HorizontalAlignment="Stretch" Grid.Row="1" HorizontalContentAlignment="Stretch"

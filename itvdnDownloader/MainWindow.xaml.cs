@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -28,13 +29,16 @@ namespace itvdnDownloader
         {
             InitializeComponent();
             context.Auth = authContext;
-            context.CanReadSourse = true;
         }
 
         private async void btVideoList_Click(object sender, RoutedEventArgs e)
         {
-
+            if (!context.CanReadSourse)
+            {
+                return;
+            }
             context.CanReadSourse = false;
+          //  await Task.Delay(5000);
             var lessons = await downloader.GetLessons(context.DataVideoPageUrl);
             foreach (var lesson in lessons)
             {
