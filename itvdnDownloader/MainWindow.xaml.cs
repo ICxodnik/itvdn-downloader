@@ -13,7 +13,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
+using winForms = System.Windows.Forms;
 
 namespace itvdnDownloader
 {
@@ -54,8 +54,15 @@ namespace itvdnDownloader
 
         private void btChoose_Click(object sender, RoutedEventArgs e)
         {
+            winForms.FolderBrowserDialog fbd = new winForms.FolderBrowserDialog();
 
-        }
+                 if(fbd.ShowDialog()==winForms.DialogResult.Cancel)
+                    {
+                         MessageBox.Show("The action was cancelled", "Cancel");
+                    }
+                  
+                        context.DataVideoLocFolder = fbd.SelectedPath;
+         }    
 
         private void btDownload_Click(object sender, RoutedEventArgs e)
         {
