@@ -28,19 +28,19 @@ namespace itvdnDownloader
         {
             InitializeComponent();
             context.Auth = authContext;
-            context.Falling = true;
+            context.CanReadSourse = true;
         }
 
         private async void btVideoList_Click(object sender, RoutedEventArgs e)
         {
 
-            context.Falling = false;
+            context.CanReadSourse = false;
             var lessons = await downloader.GetLessons(context.DataVideoPageUrl);
             foreach (var lesson in lessons)
             {
                 context.Lessons.Add(lesson);
             }
-            context.Falling = true;
+            context.CanReadSourse = true;
         }
 
         private void main_Loaded(object sender, RoutedEventArgs e)
@@ -49,7 +49,6 @@ namespace itvdnDownloader
 #if DEBUG
             context.DataVideoPageUrl = "http://itvdn.com/ru/video/csharp-essential";
 #endif
-            this.DataContext = context;
         }
 
         private void btChoose_Click(object sender, RoutedEventArgs e)
