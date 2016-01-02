@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using mshtml;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace itvdnDownloader
 {
@@ -31,43 +32,38 @@ namespace itvdnDownloader
 
         private async void btAuth_Click(object sender, RoutedEventArgs e)
         {
-            context.Falling = false;
+            if (!context.CanAuth)
+            {
+                return;
+            }
+            context.CanAuth = false;
             try
             {
                 var status = await itvdnWeb.Auth(context.Login, context.Password);
-
                 if (status)
                 {
                     AuthCompleted();
                 }
+                else
+                {
+                    MessageBox.Show("Email or/and password is incorrect", "Authorization error", MessageBoxButton.OK);
+                    context.CanAuth = true;
+                }
             }
             catch
             {
-                {
-                    // todo: display authorization error message
-                    MessageBoxResult result = MessageBox.Show("Authorization error, do you want to close this window?",
-       "Confirmation", MessageBoxButton.YesNo);
-                    if (result == MessageBoxResult.Yes)
-                    {
-                        Close();
-                    }
-                    else if (result == MessageBoxResult.No)
-                    {
-                        new MainWindow(context).Show();
-                    }
-
-                }
+                MessageBox.Show($"Can't connect to {ItvdnWeb.AuthUrl}", "Authorization error", MessageBoxButton.OK);
+                Close();
             }
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            context.Falling = true;
 #if DEBUG
             context.Login = "ICxodnik@cbsid.com";
             context.Password = "lesenkaK***";
 #endif
-            this.DataContext = context;
+            DataContext = context;
         }
 
         private void AuthCompleted()

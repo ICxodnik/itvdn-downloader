@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:itvdnDownloader"
         mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance local:AuthContext}"
         Title="Auth" Height="166.747" Width="294.903" SizeToContent="Height" WindowStyle="ToolWindow" ResizeMode="NoResize" Loaded="Window_Loaded">
     <Grid>
         <Grid.RowDefinitions>
@@ -23,7 +24,7 @@
         <Label Grid.Row="1" Grid.Column="0">Пароль:</Label>
         <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Password}"></TextBox>
 
-        <Button x:Name="btAuth" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Click="btAuth_Click" IsEnabled="{Binding Falling}">Войти</Button>
+        <Button x:Name="btAuth" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Click="btAuth_Click" IsEnabled="{Binding CanAuth}">Войти</Button>
 
     </Grid>
 </Window>

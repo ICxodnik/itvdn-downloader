@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -30,24 +31,24 @@ namespace itvdnDownloader
         {
             InitializeComponent();
             context.Auth = authContext;
-            context.Falling = true;
         }
 
         private async void btVideoList_Click(object sender, RoutedEventArgs e)
         {
-
-            context.Falling = false;
-            var lessons = await downloader.GetLessons(context.DataVideoPageUrl);
-            foreach (var lesson in lessons)
+            if (context.CanReadSourse)
             {
-                context.Lessons.Add(lesson);
+                context.CanReadSourse = false;
+                var lessons = await downloader.GetLessons(context.DataVideoPageUrl);
+                foreach (var lesson in lessons)
+                {
+                    context.Lessons.Add(lesson);
+                }
+                context.CanReadSourse = true;
             }
-            context.Falling = true;
         }
 
         private void main_Loaded(object sender, RoutedEventArgs e)
         {
-            DataContext = context;
 #if DEBUG
             context.DataVideoPageUrl = "http://itvdn.com/ru/video/csharp-essential";
 #endif

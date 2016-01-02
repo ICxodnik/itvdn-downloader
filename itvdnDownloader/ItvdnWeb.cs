@@ -12,10 +12,9 @@ namespace itvdnDownloader
 {
     class ItvdnWeb
     {
-        const string AuthUrl = "http://itvdn.com/ru/Account/Login";
-        const string AuthCompletedUrl = "http://itvdn.com/ru";
-        const string RequestVerificationToken = "__RequestVerificationToken";
-        readonly WebClient webClient = new CookieAwareWebClient();
+        public const string AuthUrl = "http://itvdn.com/ru/Account/Login";
+        private const string RequestVerificationToken = "__RequestVerificationToken";
+        private readonly WebClient webClient = new CookieAwareWebClient();
 
 
         public async Task<IEnumerable<LessonData>> GetLessons(string url)
@@ -25,17 +24,13 @@ namespace itvdnDownloader
             doc.LoadHtml(html);
             var select = "//div[@id='lessons-list']/a[@class='media']"; // XPath
             var lessons = doc.DocumentNode.SelectNodes(select);
-          
-
             return lessons.Select(href => new LessonData
             {
                 Url = href.Attributes["href"].Value,
                 Title = href.SelectSingleNode("div[@class = 'media-body']/p")?.InnerText,
-                 Number = href.SelectSingleNode("div[@class = 'pull-left']//div[@class = 'media-inner']/span")?.InnerText
-            }
-            );
+                Number = href.SelectSingleNode("div[@class = 'pull-left']//div[@class = 'media-inner']/span")?.InnerText
+            });
         }
-
 
         public async Task<bool> Auth(string login, string password)
         {
