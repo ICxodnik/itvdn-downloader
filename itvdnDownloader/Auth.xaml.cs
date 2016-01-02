@@ -23,10 +23,11 @@ namespace itvdnDownloader
     public partial class Auth : Window
     {
         private ItvdnWeb itvdnWeb = new ItvdnWeb();
-        private AuthContext context = new AuthContext();
+        private AuthContext context;
 
-        public Auth()
+        public Auth(AuthContext authContext)
         {
+            context = authContext;
             InitializeComponent();
         }
 
@@ -68,7 +69,7 @@ namespace itvdnDownloader
 
         private void AuthCompleted()
         {
-            new MainWindow(context).Show();
+            DialogResult = true;
             Close();
         }
     }

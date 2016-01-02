@@ -10,13 +10,12 @@ using System.Threading.Tasks;
 namespace itvdnDownloader
 {
     
-    class MainDataContext : INotifyPropertyChanged
+    public class MainDataContext : INotifyPropertyChanged
     {
 
         private string dataVideoPageUrl = "";
         private string dataVideoLocFolder = "";
         private bool canReadSourse = true;
-        public AuthContext Auth { get; set; }
 
         [JsonIgnore]
         public ObservableCollection<LessonData> Lessons { get; set; } = new ObservableCollection<LessonData>();

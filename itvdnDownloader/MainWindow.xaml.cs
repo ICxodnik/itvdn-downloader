@@ -24,13 +24,15 @@ namespace itvdnDownloader
     /// </summary>
     public partial class MainWindow : Window
     {
-        private MainDataContext context = new MainDataContext();
+        private MainDataContext context;
         private ItvdnWeb downloader = new ItvdnWeb();
 
-        public MainWindow(AuthContext authContext)
+        public MainWindow(MainDataContext mainContext)
         {
+            context = mainContext;
             InitializeComponent();
-            context.Auth = authContext;
+
+            this.Loaded += main_Loaded;
         }
 
         private async void btVideoList_Click(object sender, RoutedEventArgs e)
