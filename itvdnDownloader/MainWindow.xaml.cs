@@ -13,6 +13,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Ookii.Dialogs.Wpf;
+using System.IO;
 
 namespace itvdnDownloader
 {
@@ -54,7 +56,18 @@ namespace itvdnDownloader
 
         private void btChoose_Click(object sender, RoutedEventArgs e)
         {
-
+            var folderChoose = new VistaFolderBrowserDialog();
+            folderChoose.RootFolder = Environment.SpecialFolder.MyDocuments;
+            var path = Environment.GetFolderPath(folderChoose.RootFolder);
+            var dialogResult = folderChoose.ShowDialog();
+            if (dialogResult.HasValue && dialogResult.Value)
+            {
+                var choosedFolder = folderChoose.SelectedPath;
+                if (Directory.Exists(choosedFolder))
+                {
+                    context.DataVideoLocFolder = choosedFolder;
+                }
+            }
         }
 
         private void btDownload_Click(object sender, RoutedEventArgs e)
