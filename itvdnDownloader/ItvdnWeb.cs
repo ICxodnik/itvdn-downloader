@@ -6,19 +6,21 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace itvdnDownloader
 {
     class ItvdnWeb
     {
+        private readonly static CookieContainer m_cookieContainer = new CookieContainer();
+        public const string BaseAddress = "http://itvdn.com";
         public const string AuthUrl = "http://itvdn.com/ru/Account/Login";
         private const string RequestVerificationToken = "__RequestVerificationToken";
-        private readonly WebClient webClient = new CookieAwareWebClient();
-
 
         public async Task<IEnumerable<LessonData>> GetLessons(string url)
         {
+            var webClient = CreateClient();
             var html = await webClient.DownloadStringTaskAsync(url);
             var doc = new HtmlDocument();
             doc.LoadHtml(html);
@@ -34,6 +36,7 @@ namespace itvdnDownloader
 
         public async Task<bool> Auth(string login, string password)
         {
+            var webClient = CreateClient();
             var html = await webClient.DownloadStringTaskAsync(AuthUrl);
             var doc = new HtmlDocument();
             doc.LoadHtml(html);
@@ -63,5 +66,34 @@ namespace itvdnDownloader
             return userEmailNode?.InnerText == login;
         }
 
+        public async Task<string> GetLessonManifestUrl(string lessonUrl)
+        {
+            var webClient = CreateClient();
+            var html = await webClient.DownloadStringTaskAsync(lessonUrl);
+            var doc = new HtmlDocument();
+            doc.LoadHtml(html);
+
+            var node = doc.DocumentNode.SelectSingleNode("//a[@id='player']/following-sibling::script");
+            if (node?.Name == "script")
+            {
+                var jsText = node.InnerText;
+                var match = Regex.Match(jsText, "mediaUrl = '(?<url>.+?)'");
+                return match.Success ? match.Groups["url"].Value : null;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+
+
+        private WebClient CreateClient()
+        {
+            return new CookieAwareWebClient(m_cookieContainer)
+            {
+                BaseAddress = BaseAddress
+            };
+        }
     }
 }

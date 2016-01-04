@@ -26,6 +26,7 @@ namespace itvdnDownloader
     {
         private MainDataContext context;
         private ItvdnWeb downloader = new ItvdnWeb();
+        private BatchDownloader m_downloader;
 
         public MainWindow(MainDataContext mainContext)
         {
@@ -53,6 +54,7 @@ namespace itvdnDownloader
         {
 #if DEBUG
             context.DataVideoPageUrl = "http://itvdn.com/ru/video/csharp-essential";
+            context.DataVideoLocFolder = @"E:\TEMP\ITVDN_Downloader";
 #endif
             this.DataContext = context;
         }
@@ -73,9 +75,41 @@ namespace itvdnDownloader
             }
         }
 
-        private void btDownload_Click(object sender, RoutedEventArgs e)
+        private async void btDownload_Click(object sender, RoutedEventArgs e)
         {
+            if (!Directory.Exists(context.DataVideoLocFolder))
+            {
+                return;
+            }
 
+            var list = context.Lessons.Where(x => x.IsSelected).ToList();
+            m_downloader = new BatchDownloader(context.DataVideoLocFolder, 2);
+            await m_downloader.Download(list);
+            
+        }
+
+        private void main_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (m_downloader != null)
+            {
+                m_downloader.Stop();
+            }
+        }
+
+        private void SelectAll_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (var lesson in context.Lessons)
+            {
+                lesson.IsSelected = true;
+            }
+        }
+
+        private void DeselectAll_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (var lesson in context.Lessons)
+            {
+                lesson.IsSelected = false;
+            }
         }
     }
 }
