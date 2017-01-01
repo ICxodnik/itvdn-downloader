@@ -15,7 +15,7 @@ namespace itvdnDownloader
     {
         private readonly static CookieContainer m_cookieContainer = new CookieContainer();
         public const string BaseAddress = "http://itvdn.com";
-        public const string AuthUrl = "http://itvdn.com/ru/Account/Login";
+        public const string AuthUrl = "https://itvdn.com/ru/account/login";
         private const string RequestVerificationToken = "__RequestVerificationToken";
 
         public async Task<IEnumerable<LessonData>> GetLessons(string url)
@@ -37,25 +37,12 @@ namespace itvdnDownloader
         public async Task<bool> Auth(string login, string password)
         {
             var webClient = CreateClient();
-            var html = await webClient.DownloadStringTaskAsync(AuthUrl);
             var doc = new HtmlDocument();
-            doc.LoadHtml(html);
-
-            // get __RequestVerificationToken
-            var selector = "//section[@class='login-section']//form";
-            var input = doc.DocumentNode.SelectSingleNode(selector)?.NextSibling; // wtf (input is not inside form)
-            if (input?.Attributes["name"]?.Value != RequestVerificationToken)
-            {
-                return false;
-            }
-
-            var requestVerificationToken = input.Attributes["value"].Value;
 
             var authData = new NameValueCollection
             {
                 {"Email", login},
                 {"Password", password},
-                {RequestVerificationToken, requestVerificationToken}
             };
 
             var responseBytes = await webClient.UploadValuesTaskAsync(AuthUrl, "POST", authData);

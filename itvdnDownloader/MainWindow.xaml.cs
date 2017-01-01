@@ -79,7 +79,7 @@ namespace itvdnDownloader
         {
             if (!Directory.Exists(context.DataVideoLocFolder))
             {
-                return;
+                Directory.CreateDirectory(context.DataVideoLocFolder);
             }
 
             var list = context.Lessons.Where(x => x.IsSelected).ToList();
