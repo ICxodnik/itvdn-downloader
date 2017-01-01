@@ -20,6 +20,7 @@ namespace itvdnDownloader
         public string Title { get; set; }
         public string Number { get; set; }
         public string ManifestUrl { get; set; }
+        public string OutputFilePath { get; set; }
 
         public string Status
         {

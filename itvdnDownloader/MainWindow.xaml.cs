@@ -83,9 +83,16 @@ namespace itvdnDownloader
             }
 
             var list = context.Lessons.Where(x => x.IsSelected).ToList();
-            m_downloader = new BatchDownloader(context.DataVideoLocFolder, 2);
-            await m_downloader.Download(list);
-            
+            m_downloader = new BatchDownloader(context.DataVideoLocFolder);
+
+            try
+            {
+                await m_downloader.Download(list);
+            }
+            catch(TaskCanceledException cancelException)
+            {
+
+            }
         }
 
         private void main_Closing(object sender, System.ComponentModel.CancelEventArgs e)

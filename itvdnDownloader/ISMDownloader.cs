@@ -81,6 +81,10 @@ namespace itvdnDownloader
             m_muxer.Record();
             Console.WriteLine();
             Console.WriteLine("Downloading finished!");
+        }
+
+        public void Mux()
+        {
             DateTime now = DateTime.Now;
             Console.WriteLine();
             Console.WriteLine("Muxing selected tracks to MKV");

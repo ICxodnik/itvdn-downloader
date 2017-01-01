@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -11,39 +12,38 @@ namespace itvdnDownloader
 {
     class BatchDownloader
     {
-        private const int m_delayMiliseconds = 5 * 1000; // 5 second
-        private readonly uint m_concurentThreads;
-        private volatile int m_currentThreads = 0;
         private CancellationTokenSource m_cts = new CancellationTokenSource();
-        private readonly TaskFactory m_factory;
         private readonly string m_outDir;
 
-        public BatchDownloader(string outDir, uint concurentThreads = 1)
+        public BatchDownloader(string outDir)
         {
             m_outDir = outDir;
-            m_concurentThreads = concurentThreads;
-            m_factory = new TaskFactory(m_cts.Token);
         }
-
 
         public async Task Download(IList<LessonData> items)
         {
-            var queue = new Queue<LessonData>(items);
-            while (queue.Count > 0)
+            var manifestGetter = new TransformBlock<LessonData, LessonData>((Func<LessonData, LessonData>)LoadManifest,
+                new ExecutionDataflowBlockOptions() { MaxDegreeOfParallelism = 8, CancellationToken = m_cts.Token });
+
+            var mediaDownloader = new TransformBlock<LessonData, ISMDownloader>((Func<LessonData, ISMDownloader>)DownloadMedia,
+                new ExecutionDataflowBlockOptions() { MaxDegreeOfParallelism = 2, CancellationToken = m_cts.Token });
+
+            var mediaMuxer = new ActionBlock<ISMDownloader>((Action<ISMDownloader>)GenerateOutputFile, 
+                new ExecutionDataflowBlockOptions() { CancellationToken = m_cts.Token });
+
+            manifestGetter.LinkTo(mediaDownloader, new DataflowLinkOptions() { PropagateCompletion = true }, 
+                data => data.ManifestUrl != null);
+            manifestGetter.LinkTo(DataflowBlock.NullTarget<LessonData>());
+            mediaDownloader.LinkTo(mediaMuxer, new DataflowLinkOptions() { PropagateCompletion = true });
+
+            foreach (var item in items)
             {
-                if (m_currentThreads < m_concurentThreads)
-                {
-                    var item = queue.Dequeue();
-#pragma warning disable CS4014 // don't await
-                    Prepare(item).ContinueWith(OnComplete);
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                    Interlocked.Increment(ref m_currentThreads);
-                }
-
-                await Task.Delay(m_delayMiliseconds);
+                item.Progress = 50;
+                manifestGetter.Post(item);
             }
+            manifestGetter.Complete();
 
-
+            await mediaMuxer.Completion;
         }
 
         public void Stop()
@@ -51,33 +51,31 @@ namespace itvdnDownloader
             m_cts.Cancel();
         }
 
-        private void OnComplete(Task task)
+        private LessonData LoadManifest(LessonData data)
         {
-            Interlocked.Decrement(ref m_currentThreads);
+            var service = new ItvdnWeb();
+            data.OutputFilePath = Path.Combine(m_outDir, $"{data.Number}. {data.Title}.mkv");
+            data.ManifestUrl = service.GetLessonManifestUrl(data.Url).Result;
+            return data;
         }
 
-        private Task Prepare(LessonData data)
+        private ISMDownloader DownloadMedia(LessonData data)
         {
-            return m_factory.StartNew(() =>
-            {
-                var service = new ItvdnWeb();
-                data.ManifestUrl = service.GetLessonManifestUrl(data.Url).Result;
-                if (data.ManifestUrl == null)
-                {
-                    return;
-                }
-                var outFile = Path.Combine(m_outDir, $"{data.Number}. {data.Title}.mkv");
-                var args = new Arguments(new string[] { data.ManifestUrl, outFile });
+            var args = new Arguments(new string[] { data.ManifestUrl, data.OutputFilePath });
 
 #if DEBUG
-                //args.StopAfter = TimeSpan.FromSeconds(40);
+            args.StopAfter = TimeSpan.FromSeconds(15);
 #endif
 
-                var mediaDownloader = new ISMDownloader(args, m_cts.Token);
-                mediaDownloader.OnStateChanged += MediaDownloader_OnStateChanged;
-                mediaDownloader.Download(data);
+            var mediaDownloader = new ISMDownloader(args, m_cts.Token);
+            mediaDownloader.OnStateChanged += MediaDownloader_OnStateChanged;
+            mediaDownloader.Download(data);
+            return mediaDownloader;
+        }
 
-            }, m_cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Current);
+        private void GenerateOutputFile(ISMDownloader mediaDownloader)
+        {
+            mediaDownloader.Mux();
         }
 
         private void MediaDownloader_OnStateChanged(LessonData context, ISMDownloader.State state, int progress)
