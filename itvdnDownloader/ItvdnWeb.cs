@@ -6,68 +6,43 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Windows.Forms;
-using WB = System.Windows.Forms.WebBrowser;
 
 namespace itvdnDownloader
 {
     class ItvdnWeb
     {
-        const string AuthUrl = "http://itvdn.com/ru/Account/Login";
-        const string AuthCompletedUrl = "http://itvdn.com/ru";
-        const string RequestVerificationToken = "__RequestVerificationToken";
-        readonly WB browser = new WB();
-        readonly WebClient webClient = new CookieAwareWebClient();
-        private AuthContext context;
-        private Action onAuth;
-
-        public ItvdnWeb()
-        {
-            browser.ScriptErrorsSuppressed = true;
-            browser.DocumentCompleted += Browser_DocumentCompleted;
-            
-        }
+        private readonly static CookieContainer m_cookieContainer = new CookieContainer();
+        public const string BaseAddress = "http://itvdn.com";
+        public const string AuthUrl = "https://itvdn.com/ru/account/login";
+        private const string RequestVerificationToken = "__RequestVerificationToken";
 
         public async Task<IEnumerable<LessonData>> GetLessons(string url)
         {
-            //browser.Navigate()
-
-
-            //var doc = new HtmlDocument();
-            //doc.LoadHtml(html);
-
-
-
-
-
-
-
-            return null;
+            var webClient = CreateClient();
+            var html = await webClient.DownloadStringTaskAsync(url);
+            var doc = new HtmlDocument();
+            doc.LoadHtml(html);
+            var select = "//div[@id='lessons-list']/a[@class='media']"; // XPath
+            var lessons = doc.DocumentNode.SelectNodes(select);
+            return lessons.Select(href => new LessonData
+            {
+                Url = href.Attributes["href"].Value,
+                Title = href.SelectSingleNode("div[@class = 'media-body']/p")?.InnerText,
+                Number = href.SelectSingleNode("div[@class = 'pull-left']//div[@class = 'media-inner']/span")?.InnerText
+            });
         }
 
-
-        public async Task<bool> Auth2(string login, string password)
+        public async Task<bool> Auth(string login, string password)
         {
-            var html = await webClient.DownloadStringTaskAsync(AuthUrl);
-            var doc = new HtmlAgilityPack.HtmlDocument();
-            doc.LoadHtml(html);
-
-            // get __RequestVerificationToken
-            var selector = "//section[@class='login-section']//form";
-            var input = doc.DocumentNode.SelectSingleNode(selector)?.NextSibling; // wtf (input is not inside form)
-            if (input?.Attributes["name"]?.Value != RequestVerificationToken)
-            {
-                return false;
-            }
-
-            var requestVerificationToken = input.Attributes["value"].Value;
+            var webClient = CreateClient();
+            var doc = new HtmlDocument();
 
             var authData = new NameValueCollection
             {
                 {"Email", login},
                 {"Password", password},
-                {RequestVerificationToken, requestVerificationToken}
             };
 
             var responseBytes = await webClient.UploadValuesTaskAsync(AuthUrl, "POST", authData);
@@ -78,46 +53,34 @@ namespace itvdnDownloader
             return userEmailNode?.InnerText == login;
         }
 
-        public void Auth(AuthContext authContext, Action authCallback)
+        public async Task<string> GetLessonManifestUrl(string lessonUrl)
         {
-            context = authContext;
-            onAuth = authCallback;
-            browser.Navigate(AuthUrl);
-        }
+            var webClient = CreateClient();
+            var html = await webClient.DownloadStringTaskAsync(lessonUrl);
+            var doc = new HtmlDocument();
+            doc.LoadHtml(html);
 
-        private void Browser_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
-        {
-            var uri = e.Url.AbsoluteUri;
-            switch (uri)
+            var node = doc.DocumentNode.SelectSingleNode("//a[@id='player']/following-sibling::script");
+            if (node?.Name == "script")
             {
-                case AuthUrl:
-                    SetInputValue("Email", context.Login);
-                    SetInputValue("Password", context.Password);
-                    SubmitForm();
-                    break;
-                case AuthCompletedUrl:
-                    onAuth();
-                    break;
+                var jsText = node.InnerText;
+                var match = Regex.Match(jsText, "mediaUrl = '(?<url>.+?)'");
+                return match.Success ? match.Groups["url"].Value : null;
+            }
+            else
+            {
+                return null;
             }
         }
 
-        private void SetInputValue(string inputId, string value)
-        {
-            var field = browser.Document.GetElementById(inputId);
-            if (field != null)
-            {
-                field.SetAttribute("value", value);
-            }
-        }
 
-        private void SubmitForm()
-        {
-            var form = browser.Document.Forms[0];
-            if (form != null)
-            {
-                form.InvokeMember("submit");
-            }
-        }
 
+        private WebClient CreateClient()
+        {
+            return new CookieAwareWebClient(m_cookieContainer)
+            {
+                BaseAddress = BaseAddress
+            };
+        }
     }
 }

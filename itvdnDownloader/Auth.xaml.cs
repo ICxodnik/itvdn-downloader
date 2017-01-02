@@ -12,8 +12,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using mshtml;
-using System.Windows.Forms;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace itvdnDownloader
 {
@@ -23,23 +23,38 @@ namespace itvdnDownloader
     public partial class Auth : Window
     {
         private ItvdnWeb itvdnWeb = new ItvdnWeb();
-        private AuthContext context = new AuthContext();
+        private AuthContext context;
 
-        public Auth()
+        public Auth(AuthContext authContext)
         {
+            context = authContext;
             InitializeComponent();
         }
 
         private async void btAuth_Click(object sender, RoutedEventArgs e)
         {
-            var status = await itvdnWeb.Auth2(context.Login, context.Password);
-            if (status)
+            if (!context.CanAuth)
             {
-                AuthCompleted();
+                return;
             }
-            else
+            context.CanAuth = false;
+            try
             {
-                // todo: display authorization error message
+                var status = await itvdnWeb.Auth(context.Login, context.Password);
+                if (status)
+                {
+                    AuthCompleted();
+                }
+                else
+                {
+                    MessageBox.Show("Email or/and password is incorrect", "Authorization error", MessageBoxButton.OK);
+                    context.CanAuth = true;
+                }
+            }
+            catch
+            {
+                MessageBox.Show($"Can't connect to {ItvdnWeb.AuthUrl}", "Authorization error", MessageBoxButton.OK);
+                Close();
             }
         }
 
@@ -49,12 +64,12 @@ namespace itvdnDownloader
             context.Login = "ICxodnik@cbsid.com";
             context.Password = "lesenkaK***";
 #endif
-            this.DataContext = context;
+            DataContext = context;
         }
 
         private void AuthCompleted()
         {
-            new MainWindow(context).Show();
+            DialogResult = true;
             Close();
         }
     }
