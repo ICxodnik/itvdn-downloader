@@ -54,7 +54,7 @@ namespace itvdnDownloader
         {
 #if DEBUG
             context.DataVideoPageUrl = "http://itvdn.com/ru/video/csharp-essential";
-            context.DataVideoLocFolder = @"D:\TEMP\ITVDN_Downloader";
+            context.DataVideoLocFolder = @"E:\TEMP\ITVDN_Downloader";
 #endif
             this.DataContext = context;
         }
